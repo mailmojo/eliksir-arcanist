@@ -9,10 +9,12 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
+    'ArcanistESLintLinter' => 'lint/linter/ArcanistESLintLinter.php',
     'ArcanistScssLinter' => 'lint/linter/ArcanistScssLinter.php',
   ),
   'function' => array(),
   'xmap' => array(
+    'ArcanistESLintLinter' => 'ArcanistExternalLinter',
     'ArcanistScssLinter' => 'ArcanistExternalLinter',
   ),
 ));
