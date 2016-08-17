@@ -6,7 +6,7 @@
  * This linter uses [[https://github.com/causes/scss-lint | scss-lint]]
  * to detect errors and potential problems in [[http://sass-lang.com | SCSS]] code.
  */
-final class ArcanistScssLinter extends ArcanistExternalLinter {
+final class ArcanistScssLintLinter extends ArcanistExternalLinter {
 
   const LINT_WARNING          = 1;
   const LINT_SYNTAX_ERROR     = 2;
@@ -29,7 +29,7 @@ final class ArcanistScssLinter extends ArcanistExternalLinter {
   }
 
   public function getLinterName() {
-    return 'SCSS-LINT';
+    return 'scss-lint';
   }
 
   public function getLinterConfigurationName() {
@@ -63,12 +63,12 @@ final class ArcanistScssLinter extends ArcanistExternalLinter {
     list($stdout) = execx('%C --version', $this->getExecutableCommand());
 
     $matches = array();
-    $regex = '/^scss-lint (?P<version>\d+\.\d+\.\d+)\b/';
+    $regex = '/(?P<version>\d+\.\d+\.\d+)\b/';
     if (preg_match($regex, $stdout, $matches)) {
-      $version = $matches['version'];
-    } else {
-      return false;
+      return $matches['version'];
     }
+
+    return false;
   }
 
   public function getInstallInstructions() {
@@ -82,11 +82,19 @@ final class ArcanistScssLinter extends ArcanistExternalLinter {
   public function getLintSeverityMap () {
     return array(
       'E' => ArcanistLintSeverity::SEVERITY_ERROR,
-      'W' => ArcanistLintSeverity::SEVERITY_WARNING
+      'W' => ArcanistLintSeverity::SEVERITY_WARNING,
     );
   }
 
-  protected function parseLinterOutput($path, $err, $stdout, $stderr) {
+  /**
+   * Parse output of the `scss-lint` command.
+   *
+   * The `scss-lint` command uses a custom format for its output.
+   *
+   * The output is just errors, one on each line, with the following format:
+   * <path>:<line> [<severity flag>] <rule>: <message>
+   */
+  protected function parseLinterOutput ($path, $err, $stdout, $stderr) {
     $lines = phutil_split_lines($stdout, false);
 
     $messages = array();
@@ -125,6 +133,4 @@ final class ArcanistScssLinter extends ArcanistExternalLinter {
 
     return $messages;
   }
-
 }
-
