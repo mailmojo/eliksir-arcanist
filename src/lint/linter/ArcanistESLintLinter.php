@@ -27,7 +27,7 @@ final class ArcanistESLintLinter extends ArcanistExternalLinter {
     }
 
     public function getVersion() {
-        $output = exec('eslint --version');
+        $output = exec('eslint_d --version');
 
         if (strpos($output, 'command not found') !== false) {
             return false;
@@ -45,7 +45,7 @@ final class ArcanistESLintLinter extends ArcanistExternalLinter {
     }
 
     public function getDefaultBinary() {
-        return 'eslint';
+        return 'eslint_d';
     }
 
     public function getInstallInstructions() {
