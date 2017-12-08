@@ -31,7 +31,7 @@ final class DockerizedPytestTestEngine extends ArcanistUnitTestEngine {
         }
 
         // TODO: Limiting reporting to $this->getPaths() might speed up reporting somewhat
-        $future = new ExecFuture('./bin/coverage-wrapper.sh xml -o %s', $cover_file);
+        $future = new ExecFuture('./bin/coverage xml -o %s', $cover_file);
         $future->setCWD($this->projectRoot);
         $future->resolvex();
 
@@ -50,7 +50,7 @@ final class DockerizedPytestTestEngine extends ArcanistUnitTestEngine {
 
         if ($this->getEnableCoverage() !== false) {
             $cmd_line = csprintf(
-                './bin/coverage-wrapper.sh run -m %C',
+                './bin/coverage run -m %C',
                 $cmd_line);
         }
 
