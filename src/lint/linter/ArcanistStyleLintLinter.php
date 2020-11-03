@@ -1,43 +1,41 @@
 <?php
 
 /**
- * A linter for SCSS files using the `sass-lint` tool.
+ * A linter for CSS/SCSS files using the `stylelint` tool.
  *
- * This linter uses [[https://github.com/sasstools/sass-lint] | sass-lint]
- * to detect errors and potential problems in [[http://sass-lang.com | SCSS]] code.
+ * This linter uses [[https://stylelint.io/] | stylelint] to detect errors and potential problems in
+ * CSS/SCSS code.
  */
-final class ArcanistSassLintLinter extends ArcanistExternalLinter {
+final class ArcanistStyleLintLinter extends ArcanistExternalLinter {
 
   public function getInfoName() {
-    return pht('SASS');
+    return pht('CSS/SCSS');
   }
 
   public function getInfoURI() {
-    return 'http://sass-lang.com/';
+    return 'https://stylelint.io/';
   }
 
   public function getInfoDescription() {
     return pht(
-      'Use the `sass-lint` tool to detect errors in SASS source files.');
+      'Use the `stylelint` tool to detect errors in CSS/SCSS source files.');
   }
 
   public function getLinterName() {
-    return 'sass-lint';
+    return 'stylelint';
   }
 
   public function getLinterConfigurationName() {
-    return 'sass-lint';
+    return 'stylelint';
   }
 
   public function getDefaultBinary() {
-    return 'sass-lint';
+    return 'stylelint';
   }
 
   protected function getMandatoryFlags() {
     return array(
-      '--format=stylish',
-      '--no-exit',
-      '--verbose'
+       '--no-color',
     );
   }
 
@@ -53,11 +51,11 @@ final class ArcanistSassLintLinter extends ArcanistExternalLinter {
   }
 
   public function getInstallInstructions() {
-    return pht('Install sass-lint using `%s`.', 'npm install -g sass-lint');
+    return pht('Install stylelint using `%s`.', 'npm install -g stylelint');
   }
 
   /**
-   * Parse output from `sass-lint`.
+   * Parse output from `stylelint`.
    *
    * The output will be in the `stylish` format, as popularized by other
    * linters like jshint and eslint.
@@ -76,15 +74,16 @@ final class ArcanistSassLintLinter extends ArcanistExternalLinter {
     $messages = array();
     foreach ($lines as $line) {
       $clean_line = $output = preg_replace('!\s+!', ' ', $line);
-      $parts = explode(' ', ltrim($clean_line));
+      $parts = explode(' ', trim($clean_line));
 
       if (isset($parts[1]) &&
-          ($parts[1] === 'error' || $parts[1] === 'warning')) {
-        $severity = $parts[1] === 'error' ?
+          ($parts[1] === '✖' || $parts[1] === '⚠')) {
+        $severity = $parts[1] === '✖' ?
             ArcanistLintSeverity::SEVERITY_ERROR :
             ArcanistLintSeverity::SEVERITY_WARNING;
 
         list($line, $char) = explode(':', $parts[0]);
+        $rule = array_pop($parts);
 
         $message = new ArcanistLintMessage();
         $message->setPath($path);
@@ -92,7 +91,7 @@ final class ArcanistSassLintLinter extends ArcanistExternalLinter {
         $message->setChar($char);
         $message->setCode($this->getLinterName());
         $message->setName($this->getLinterName());
-        $message->setDescription(implode(' ', $parts));
+        $message->setDescription(implode(' ', $parts) . " [{$rule}]");
         $message->setSeverity($severity);
 
         $messages[] = $message;
